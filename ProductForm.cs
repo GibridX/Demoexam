@@ -90,12 +90,8 @@ namespace Demoexam
 
                 if (_article == null) 
                 {
-                    int maxId = db.Products
-                        .Select(x => int.Parse(x.Article))
-                        .DefaultIfEmpty(0)
-                        .Max();
-                    p.Article = (maxId + 1).ToString();
-                    db.Products.Add(p); 
+                    p.Article = Guid.NewGuid().ToString("N")[..6].ToUpper();
+                    db.Products.Add(p);
                 }
                 else
                 {

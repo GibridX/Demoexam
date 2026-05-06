@@ -1,5 +1,6 @@
 ﻿using Demoexam.Database;
 using Demoexam.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace Demoexam
@@ -19,7 +20,7 @@ namespace Demoexam
             this.Icon = new Icon("Photos/Icon.ico");
         }
 
-        private void MainForm_Load(object? sender, EventArgs e)
+        private async void MainForm_Load(object? sender, EventArgs e)
         {
             lblUser.Text = $"{_user.Fullname} | {_user.Role}";
             if (_user.Role.Contains("Гость"))
@@ -35,13 +36,13 @@ namespace Demoexam
             btnAdd.Visible = _user.IsAdmin; btnDelete.Visible = _user.IsAdmin;
             btnOrders.Visible = can;
 
-            cbSupplier.Items.Add("Все поставщики");
             using var db = new AppDbContext();
-            foreach (var s in db.Products.Select(p => p.Supplier).Distinct().OrderBy(x => x))
-            {
-                cbSupplier.Items.Add(s);
-            }
-            cbSupplier.SelectedIndex = 0;
+            var supplier = await db.Products
+                .Select(p => p.Supplier)
+                .Distinct()
+                .OrderBy(p => p)
+                .ToListAsync();
+            cbSupplier.Items.AddRange(["Все поставщики", .. supplier]);
 
             cbSort.Items.AddRange(["На складе ув.", "На складе ум.", "Без сортировка"]);
             cbSort.SelectedIndex = 2;
