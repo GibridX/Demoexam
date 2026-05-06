@@ -1,2 +1,2 @@
 ﻿# В скором времени здесь будет информация...
-![Заглушка](../images/playsholder.jpg)
+![Заглушка](../images/placeholder.jpg)
