@@ -3,6 +3,7 @@
 
 1. [LINQ](#linq)
 1. [EntityFrameworkCore](#ef)
+1. [DataAnnotations](#annotation)
 
 <a id="linq"></a>
 ## LINQ (Language Integrated Query)
@@ -24,7 +25,7 @@ using (var db = new AppDbContext())
 
     var highEndElectronics = db.Products
         .Where(p => p.Category == "Electronics" && p.Price > 50000) // Фильтрация
-        .OrderByDescending(p => p.Price)                             // Сортировка
+        .OrderByDescending(p => p.Price)                            // Сортировка
         .Select(p => new { p.Title, p.Price })                      // Выбираем только нужные поля
         .ToList();                                                  // Выполнение запроса
 
@@ -56,7 +57,7 @@ ORDER BY Price DESC
 > Обратите внимание: благодаря методу .Select(), мы создали анонимный тип. Это полезно в LINQ to Entities, так как база данных вернет только два столбца вместо всей таблицы.
 
 ## EntityFrameworkCore (PostgreSQl)
-Для работы с PostgreSQL через EntityFrameworkCore (сокр. EF), используется пакет **EntityFrameworkCore.PostgreSQL**
+Для работы с PostgreSQL через EntityFrameworkCore (сокр. EF), используется пакет [EntityFrameworkCore.PostgreSQL 8.0.11](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL/8.0.11)
 
 #### Пример работы
 1. **Определение модели и контекста**
@@ -115,3 +116,79 @@ using (AppDbContext db = new AppDbContext())
 Список пользователей (старше 30):
 1. Tom - 33 лет
 ```
+
+# DataAnnotation
+Аннотации представляют настройку сопоставления моделей и таблиц с помощью атрибута. Большинстов аннотаций располагаются в пространстве **System.ComponentModel.DataAnnotations**, которое нам надо подключить в файл C# перед использованием аннотаций.
+
+["Аннотации" Metanit.com](https://metanit.com/sharp/entityframework/6.3.php)
+
+### Пример в коде
+```csharp
+[Table("users")]
+    public class User
+    {
+        [Key, Column("id")]
+        public int Id { get; set; }
+        [Column("role")]
+        public string Role { get; set; } = string.Empty;
+        [Column("full_name")]
+        public string Fullname { get; set; } = string.Empty;
+        [Column("login")]
+        public string Login { get; set; } = string.Empty;
+        [Column("password")]
+        public string Password { get; set; } = string.Empty;
+
+        [NotMapped]
+        public bool IsAdmin => Role == "Администратор";
+        [NotMapped]
+        public bool CanSearch => Role == "Администратор" || Role == "Менеджер";
+    }
+```
+
+### Настройка ключа [Key]
+
+Для настройки свойства в качестве первичного ключа применяется атрибут `[Key]`:
+
+```csharp
+[Key, Column("id")]
+public int Id { get; set; }
+```
+
+Теперь свойство `Id` будет рассмотриваться в качестве первичного ключа.
+
+### Сопосталение с таблицей и столбцами
+
+Entity Framework при создании и сопоставлении таблиц и столбцов использует имена моделей и их свойств. Но мы можем переопределить это поведение с помощью **Table** и **Column**:
+
+```csharp
+[Table("users")]
+public class User
+{
+    [Key, Column("id")]
+    public int Id { get; set; }
+    [Column("full_name")]
+    public string FullName { get; set; } = string.Empty;
+}
+```
+
+Теперь сущность **User** будет сопоставляться с таблицей **users**, а свойство **FullName** со столбцом **full_name**.
+
+### Атрибут NotMapped
+По умолчанию все публичные свойства сопоставляютсяя с определенными столбцами в таблицами. Но такое поведение не всегда необходимо. Иногда требуется, наоборот, определенное свойство, чтобы для него не создавался столбец в таблице. И для этих целей есть атрибут **Not Mapped**:
+
+```csharp
+[Table("users")]
+public class User
+{
+    [Key, Column("id")]
+    public int Id { get; set; }
+    [Column("full_name")]
+    public string FullName { get; set; } = string.Empty;
+    [NotMapped]
+    public bool IsAdmin => Role == "Администратор";
+    [NotMapped]
+    public bool CanSearch => Role == "Администратор" || Role == "Менеджер";
+}
+```
+
+Чтобы задействовать атрибут **Not Mapped**, надо покдключить пространство имен **System.ComponentModel.DataAnnotations.Schema
