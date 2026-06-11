@@ -191,4 +191,4 @@ public class User
 }
 ```
 
-Чтобы задействовать атрибут **Not Mapped**, надо покдключить пространство имен **System.ComponentModel.DataAnnotations.Schema
+Чтобы задействовать атрибут **Not Mapped**, надо покдключить пространство имен **System.ComponentModel.DataAnnotations.Schema**
